@@ -1,9 +1,11 @@
-FROM ubuntu
+FROM ibmcom/swift-ubuntu
 
 WORKDIR /container
 
 COPY support /container/support/
-COPY bsuir-stp /container/stp
+COPY bsuir-stp /container/stp/
+
+RUN support/build_swift_script.sh
 
 # Install packages and perform cleanup
 RUN apt-get update -qq -y && apt-get install --no-install-recommends -y \
