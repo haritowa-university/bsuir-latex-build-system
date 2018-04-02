@@ -10,6 +10,7 @@ pipeline {
                     env.SECTIONS_PATH = configData.sections_path ?: 'sections'
                     env.PREAMBLE_CUSTOMIZATION_FILE = configData.preamble_customization_file ?: 'preamble-customization.tex'
                     env.ADDITIONAL_INPUTS = configData.additional_inputs ?: ["title", "abstract", "table_of_contents", "glossary"]
+                    env.BIBLIOGRAPHY_DB = configData.bibliographa_db ?: "bibliography_database"
                 }
             }
         }
@@ -28,7 +29,7 @@ pipeline {
             steps {
                 sh 'cp -r /container/* .'
                 sh 'cp -r stp/* $ROOT_TEX_PATH/'
-                sh './latex-project-builder -r ${ROOT_TEX_PATH} -s ${SECTIONS_PATH} -p ${PREAMBLE_CUSTOMIZATION_FILE}'
+                sh './latex-project-builder -r ${ROOT_TEX_PATH} -s ${SECTIONS_PATH} -p ${PREAMBLE_CUSTOMIZATION_FILE} -b ${BIBLIOGRAPHY_DB}'
 
                 // Stupid jenkins bug with dir inside docker container
                 sh 'cd tex && $PDFLATEX $MAINTEX'
