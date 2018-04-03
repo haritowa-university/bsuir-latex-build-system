@@ -34,11 +34,8 @@ pipeline {
                 // Stupid jenkins bug with dir inside docker container
                 sh 'cd tex && $PDFLATEX $MAINTEX'
 
-                // TODO: Add makeglossaries to preamble
-                // sh 'cd tex && makeglossaries $MAINTEX'
-
-                // TODO: Add support for bibtex
-                // sh 'cd tex && bibtex $MAINTEX'
+                sh 'cd tex && makeglossaries $MAINTEX'
+                sh 'cd tex && bibtex $MAINTEX'
 
                 sh '''cd tex && $PDFLATEX $MAINTEX > /dev/null
                     $PDFLATEX $MAINTEX'''
