@@ -16,14 +16,15 @@ pipeline {
         }
         stage('Preapre build folder') {
             steps {
-                sh 'mkdir build-result'
+            	sh 'rm -rf ${HOME}/bsuir-jenkins/build-result'
+                sh 'mkdir -p ${HOME}/bsuir-jenkins/build-result'
             }
         }
         stage('Build') {
             agent {
                 docker {
                     image 'haritowa/bsuir-latex-build-system:0.0.1'
-                    args '-v ${WORKSPACE}/build-result:/build-result'
+                    args '-v ${HOME}/bsuir-jenkins/build-result:/build-result'
                 }
             }
             steps {
@@ -40,7 +41,7 @@ pipeline {
                 sh '''cd tex && $PDFLATEX $MAINTEX > /dev/null
                     $PDFLATEX $MAINTEX'''
 
-                sh 'cp tex/$MAINTEX.pdf /build-result/$RESULT_PDF_NAME'
+                sh 'cp tex/$MAINTEX.pdf ${HOME}/bsuir-jenkins/build-result/$RESULT_PDF_NAME'
             }
         }
         stage('Cleanup') {
@@ -53,10 +54,11 @@ pipeline {
                 newBuild = "${BRANCH_NAME}(${BUILD_NUMBER}).pdf"
                 dropboxFolder = "build/${BRANCH_NAME}"
                 dropboxURL = "$DROPBOX_ROOT_URL/${dropboxFolder}"
+                buildResultPath = "${HOME}/bsuir-jenkins/build-result/${RESULT_PDF_NAME}"
             }
             steps {
-                archiveArtifacts env.RESULT_PDF_NAME
-                sh 'cp $RESULT_PDF_NAME ${newBuild}'
+            	sh 'cp ${buildResultPath} ${newBuild}'
+                archiveArtifacts newBuild
                 
                 script {
                     if (env.DROPBOX_CONFIG_NAME != null) {
