@@ -41,7 +41,7 @@ pipeline {
                 sh '''cd tex && $PDFLATEX $MAINTEX > /dev/null
                     $PDFLATEX $MAINTEX'''
 
-                sh 'cp tex/$MAINTEX.pdf ${HOME}/bsuir-jenkins/build-result/$RESULT_PDF_NAME'
+                sh 'cp tex/$MAINTEX.pdf /build-result/$RESULT_PDF_NAME'
             }
         }
         stage('Cleanup') {
