@@ -10,7 +10,10 @@ RUN support/build_swift_script.sh
 # Install packages and perform cleanup
 RUN apt-get update -qq -y && apt-get install --no-install-recommends -y \
      texlive-full \
-     python-pygments \
+     python-pip \
+&& pip install --upgrade pip \
+&& pip install --upgrade virtualenv \
+&& pip install Pygments \
 && rm -rf /tmp/* /var/tmp/* \
 && rm -rf /var/lib/apt/lists/* \
 && rm -rf /usr/share/doc/
