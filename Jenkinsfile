@@ -30,7 +30,7 @@ pipeline {
             steps {
                 sh 'cp -r /container/* .'
                 sh 'cp -r stp/* $ROOT_TEX_PATH/'
-                sh './latex-project-builder -r ${ROOT_TEX_PATH} -s ${SECTIONS_PATH} -p ${PREAMBLE_CUSTOMIZATION_FILE} -b ${BIBLIOGRAPHY_DB} -a ${ADDITIONAL_INPUTS}'
+                sh './latex-project-builder -r ${ROOT_TEX_PATH} -s ${SECTIONS_PATH} -p ${PREAMBLE_CUSTOMIZATION_FILE} -b ${BIBLIOGRAPHY_DB} -a ${ADDITIONAL_INPUTS//[\[\]\,]}'
 
                 // Stupid jenkins bug with dir inside docker container
                 sh 'cd tex && $PDFLATEX $MAINTEX'
