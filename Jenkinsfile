@@ -13,6 +13,12 @@ pipeline {
 
                     def rawAdditionalIputs = configData.additional_inputs ?: ["title", "abstract", "table_of_contents", "glossary"]
                     env.ADDITIONAL_INPUTS = rawAdditionalIputs.join(' ')
+
+                    echo env.ROOT_TEX_PATH
+                    echo env.SECTIONS_PATH
+                    echo env.PREAMBLE_CUSTOMIZATION_FILE
+                    echo env.BIBLIOGRAPHY_DB
+                    echo env.ADDITIONAL_INPUTS
                 }
             }
         }
@@ -36,20 +42,20 @@ pipeline {
                 sh './latex-project-builder -r ${ROOT_TEX_PATH} -s ${SECTIONS_PATH} -p ${PREAMBLE_CUSTOMIZATION_FILE} -b ${BIBLIOGRAPHY_DB} -i ${ADDITIONAL_INPUTS}'
 
                 // Stupid jenkins bug with dir inside docker container
-                sh 'cd tex && $PDFLATEX $MAINTEX'
+                sh 'cd $ROOT_TEX_PATH && $PDFLATEX $MAINTEX'
 
-                sh 'cd tex && makeglossaries $MAINTEX'
-                sh 'cd tex && bibtex $MAINTEX'
+                sh 'cd $ROOT_TEX_PATH && makeglossaries $MAINTEX'
+                sh 'cd $ROOT_TEX_PATH && bibtex $MAINTEX'
 
-                sh '''cd tex && $PDFLATEX $MAINTEX > /dev/null
+                sh '''cd $ROOT_TEX_PATH && $PDFLATEX $MAINTEX > /dev/null
                     $PDFLATEX $MAINTEX'''
 
-                sh 'cp tex/$MAINTEX.pdf /build-result/$RESULT_PDF_NAME'
+                sh 'cp $ROOT_TEX_PATH/$MAINTEX.pdf /build-result/$RESULT_PDF_NAME'
             }
         }
         stage('Cleanup') {
             steps {
-                sh 'find -E tex/ -maxdepth 1 -type f ! -regex ".*\\.(tex|log|blg|bib|cls|sty|bst|clo|asm|gitignore)" -exec rm -f {} \\; ;'
+                sh 'find -E $ROOT_TEX_PATH/ -maxdepth 1 -type f ! -regex ".*\\.(tex|log|blg|bib|cls|sty|bst|clo|asm|gitignore)" -exec rm -f {} \\; ;'
             }
         }
         stage('Release') {
