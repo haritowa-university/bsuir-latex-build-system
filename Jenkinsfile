@@ -13,6 +13,12 @@ pipeline {
 
                     def rawAdditionalIputs = configData.additional_inputs ?: ["title", "abstract", "table_of_contents", "glossary"]
                     env.ADDITIONAL_INPUTS = rawAdditionalIputs.join(' ')
+
+                    echo env.ROOT_TEX_PATH
+                    echo env.SECTIONS_PATH
+                    echo env.PREAMBLE_CUSTOMIZATION_FILE
+                    echo env.BIBLIOGRAPHY_DB
+                    echo env.ADDITIONAL_INPUTS
                 }
             }
         }
