@@ -9,35 +9,37 @@ pipeline {
                     env.ROOT_TEX_PATH = configData.root_tex_path ?: 'tex'
                     env.SECTIONS_PATH = configData.sections_path ?: 'sections'
                     env.PREAMBLE_CUSTOMIZATION_FILE = configData.preamble_customization_file ?: 'preamble-customization.tex'
-                    env.ADDITIONAL_INPUTS = configData.additional_inputs ?: ["title", "abstract", "table_of_contents", "glossary"]
+                    env.BIBLIOGRAPHY_DB = configData.bibliographa_db ?: "bibliography_database"
+
+                    def rawAdditionalIputs = configData.additional_inputs ?: ["title", "abstract", "table_of_contents", "glossary"]
+                    env.ADDITIONAL_INPUTS = rawAdditionalIputs.join(' ')
                 }
             }
         }
         stage('Preapre build folder') {
             steps {
-                sh 'mkdir build-result'
+            	sh 'rm -rf ${HOME}/bsuir-jenkins/build-result'
+                sh 'mkdir -p ${HOME}/bsuir-jenkins/build-result'
             }
         }
         stage('Build') {
             agent {
                 docker {
                     image 'haritowa/bsuir-latex-build-system:0.0.1'
-                    args '-v ${WORKSPACE}/build-result:/build-result'
+                    args '-v ${HOME}/bsuir-jenkins/build-result:/build-result'
                 }
             }
             steps {
                 sh 'cp -r /container/* .'
                 sh 'cp -r stp/* $ROOT_TEX_PATH/'
-                sh './latex-project-builder -r ${ROOT_TEX_PATH} -s ${SECTIONS_PATH} -p ${PREAMBLE_CUSTOMIZATION_FILE}'
+
+                sh './latex-project-builder -r ${ROOT_TEX_PATH} -s ${SECTIONS_PATH} -p ${PREAMBLE_CUSTOMIZATION_FILE} -b ${BIBLIOGRAPHY_DB} -i ${ADDITIONAL_INPUTS}'
 
                 // Stupid jenkins bug with dir inside docker container
                 sh 'cd tex && $PDFLATEX $MAINTEX'
 
-                // TODO: Add makeglossaries to preamble
-                // sh 'cd tex && makeglossaries $MAINTEX'
-
-                // TODO: Add support for bibtex
-                // sh 'cd tex && bibtex $MAINTEX'
+                sh 'cd tex && makeglossaries $MAINTEX'
+                sh 'cd tex && bibtex $MAINTEX'
 
                 sh '''cd tex && $PDFLATEX $MAINTEX > /dev/null
                     $PDFLATEX $MAINTEX'''
@@ -55,10 +57,11 @@ pipeline {
                 newBuild = "${BRANCH_NAME}(${BUILD_NUMBER}).pdf"
                 dropboxFolder = "build/${BRANCH_NAME}"
                 dropboxURL = "$DROPBOX_ROOT_URL/${dropboxFolder}"
+                buildResultPath = "${HOME}/bsuir-jenkins/build-result/${RESULT_PDF_NAME}"
             }
             steps {
-                archiveArtifacts env.RESULT_PDF_NAME
-                sh 'cp $RESULT_PDF_NAME ${newBuild}'
+            	sh 'cp ${buildResultPath} ${newBuild}'
+                archiveArtifacts newBuild
                 
                 script {
                     if (env.DROPBOX_CONFIG_NAME != null) {
