@@ -24,4 +24,4 @@ RUN cd /usr/local/lib/python2.7/dist-packages/pygments/lexers/ \
 	&& python _mapping.py
 
 # Install modified scalable fonts
-CMD ["dpkg", "support/scalable-cyrfonts.deb"]
+RUN dpkg -i support/scalable-cyrfonts.deb && apt-get install -f
